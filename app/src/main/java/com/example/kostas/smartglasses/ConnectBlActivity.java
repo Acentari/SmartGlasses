@@ -36,7 +36,6 @@ public class ConnectBlActivity extends AppCompatActivity {
         b = findViewById(R.id.button);  //the usless button takes the reference from the xml file
 
 
-
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();   //This assignment is being assigned to the value of the bluetooth adapter
         //Checking if the bluetooth is enabled. If not, we request its enabling
         if (!mBluetoothAdapter.isEnabled()) {
@@ -45,21 +44,29 @@ public class ConnectBlActivity extends AppCompatActivity {
         }
 
 
-        //If the bluetooth is enabled we get all the paired bluetooth devices of the phone and search for the name
-        // of the device we want to connect to.
-        final Set<BluetoothDevice> pairedDevices = ConnectBlActivity.getMBluetoothAdapter().getBondedDevices();
-        if(pairedDevices.size() > 0){
-            for(BluetoothDevice device : pairedDevices){
-                mDevice = device;
-                if(device.getName().equals("HC-06")){
-                    con = new ConnectThread(mDevice);   //The object of the ConnectThread is being created here. The constructor takes the wanted device as a parameter if found
-                    con.start();    //The thread starts
+        else{
+            //If the bluetooth is enabled we get all the paired bluetooth devices of the phone and search for the name
+            // of the device we want to connect to.
 
-                    //These are actions for the state of the connection
-                    filter = new IntentFilter();
-                    filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-                    filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
-                    filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+            //Here the NotificationListerService is being started
+            Intent in = new Intent(getApplicationContext(), NLService.class);
+            startService(in);
+
+
+            final Set<BluetoothDevice> pairedDevices = ConnectBlActivity.getMBluetoothAdapter().getBondedDevices();
+            if(pairedDevices.size() > 0){
+                for(BluetoothDevice device : pairedDevices){
+                    mDevice = device;
+                    if(device.getName().equals("HC-06")){
+                        con = new ConnectThread(mDevice);   //The object of the ConnectThread is being created here. The constructor takes the wanted device as a parameter if found
+                        con.start();    //The thread starts
+
+                        //These are actions for the state of the connection
+                        filter = new IntentFilter();
+                        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+                        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+                        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+                    }
                 }
             }
         }
@@ -68,11 +75,6 @@ public class ConnectBlActivity extends AppCompatActivity {
         //We prompt the user to allow the app to have access to read the notifications
         enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog();
         enableNotificationListenerAlertDialog.show();
-
-
-        //Here the NotificationListerService is being started
-        Intent in = new Intent(getApplicationContext(), NLService.class);
-        startService(in);
 
 
         //Here we register the receiver which helps recognize the state of the connection
