@@ -1,2 +1,2 @@
 # SmartGlasses
-The SmartGlasses.zip contains the code with commends.
+The SmartGlasses.zip contains the code with the commends.
