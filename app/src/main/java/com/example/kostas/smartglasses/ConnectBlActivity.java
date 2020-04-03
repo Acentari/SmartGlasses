@@ -51,7 +51,7 @@ public class ConnectBlActivity extends AppCompatActivity {
 
 
             //If the bluetooth is enabled we get all the paired bluetooth devices of the phone and search for the name
-            // of the device we want to connect to
+            // of the device we want to connect to.
             final Set<BluetoothDevice> pairedDevices = ConnectBlActivity.getMBluetoothAdapter().getBondedDevices();
             if(pairedDevices.size() > 0){
                 for(BluetoothDevice device : pairedDevices){
