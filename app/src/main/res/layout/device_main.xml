@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".MainActivity">
+    android:background="#444952">
 
+
+    <ImageView
+        android:layout_marginTop="-2dp"
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignTop="@+id/switch5"
+        android:layout_alignParentStart="true"
+        android:background="#000000"
+        android:src="#000000" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/imageView4"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="-303dp"
+        android:background="#000000"
+        android:src="#000000" />
 
     <TextView
         android:id="@+id/textView"
@@ -21,77 +39,85 @@
         android:id="@+id/imageView4"
         android:layout_width="match_parent"
         android:layout_height="235dp"
-        app:srcCompat="@drawable/glass" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="117dp"
+        app:srcCompat="@drawable/glass">
 
-    <TextView
-        android:id="@+id/textView3"
+    </ImageView>
+
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textAlignment="center"
-        android:textSize="28dp" />
+        android:layout_height="1dp"
+        android:layout_alignBottom="@+id/switch5"
+        android:layout_marginBottom="-2dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="56dp"
+        android:background="#000000"
+        android:src="#000000" />
 
-<android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignBottom="@+id/switch6"
+        android:layout_marginBottom="-2dp"
+        android:background="#000000"
+        android:src="#000000" />
 
     <ImageView
         android:id="@+id/imageView6"
-        android:layout_width="59dp"
-        android:layout_height="62dp"
-        android:background="@drawable/facebook"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints" />
+        android:layout_width="50dp"
+        android:layout_height="48dp"
+        android:layout_above="@+id/switch6"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="14dp"
+        android:background="@drawable/facebook" />
+
     <Switch
         android:id="@+id/switch5"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
-        android:text="         Facebook"
-        android:textSize="28dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+        android:layout_height="70dp"
+        android:layout_alignTop="@+id/imageView6"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="-10dp"
+        android:text="              Facebook"
+        android:textColor="#cec8c1"
+        android:textSize="20dp" />
     <ImageView
         android:id="@+id/imageView7"
-        android:layout_width="60dp"
-        android:layout_height="57dp"
-        android:background="@drawable/insta"
-        app:layout_constraintTop_toBottomOf="@+id/imageView6"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="0dp" />
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="112dp"
+        android:background="@drawable/insta" />
+
     <Switch
         android:id="@+id/switch6"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
-        android:text="         Instagram"
-        android:textSize="28dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switch5"
-        />
-
+        android:layout_height="70dp"
+        android:layout_alignBottom="@+id/imageView7"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="-10dp"
+        android:text="              Instagram"
+        android:textColor="#cec8c1"
+        android:textSize="20sp" />
     <TextView
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="title"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="133dp" />
-
-    <TextView
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/message"
-        android:layout_width="wrap_content"
-        android:layout_height="16dp"
-        android:text="message"
-        tools:layout_editor_absoluteX="3dp"
-        tools:layout_editor_absoluteY="152dp" />
-</android.support.constraint.ConstraintLayout>
-
-</LinearLayout>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="192dp"
+        android:layout_marginEnd="63dp"
+        android:maxWidth="100dp"
+        android:maxHeight="90dp"
+        android:textSize="10sp" />
+</RelativeLayout>

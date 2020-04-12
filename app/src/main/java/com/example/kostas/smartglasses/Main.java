@@ -1,5 +1,8 @@
 package com.example.kostas.smartglasses;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v7.app.AppCompatActivity;
@@ -17,11 +20,14 @@ public class Main extends AppCompatActivity {
     private static Switch instagram;
     private static IntentFilter filterF;
     private static IntentFilter filterI;
+    public static IntentFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.device_main);
+
+
         //The variable take their reference from the xml file
         facebook = findViewById(R.id.switch5);
         instagram = findViewById(R.id.switch6);
@@ -29,12 +35,33 @@ public class Main extends AppCompatActivity {
         t = findViewById(R.id.title);
 
 
+        //These are actions for the state of the connection
+        filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+//        filter.addAction(String.valueOf(!mBluetoothAdapter.isEnabled()));
+
+        BluetoothConnectedReceiver mmReceiver = new BluetoothConnectedReceiver();
+        this.registerReceiver(mmReceiver, filter);
+
+
+        if(NLService.getFb()){
+            facebook.setChecked(true);
+        }
+
+
+        if(NLService.getInsta()){
+            instagram.setChecked(true);
+        }
+
+
         //If the user wands to listen to facebook turns on the switch
         facebook.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
-                    NLService.setFb(true);  //if the switch is on the facebook listening state goes to true
+                    NLService.setFb(true);//if the switch is on the facebook listening state goes to true
                 }
                 //If not, it goes to false
                 if (!isChecked){
@@ -49,30 +76,12 @@ public class Main extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
+                    NLService.setInsta(true);
+                }
+                if(!isChecked){
+                    NLService.setInsta(false);
                 }
             }
         });
-    }
-
-    //Get the facebook switch state
-    public Switch getFacebook(){
-        return facebook;
-    }
-
-
-    //Get the instagram listening state
-    public Switch getInstagram(){
-        return instagram;
-    }
-
-
-    //I really have no idea why these methods still exist
-    public static IntentFilter getFilterF(){
-        return filterF;
-    }
-
-
-    public static void setFilterF(IntentFilter inf){
-        filterF = inf;
     }
 }

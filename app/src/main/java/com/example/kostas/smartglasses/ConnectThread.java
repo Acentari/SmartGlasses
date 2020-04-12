@@ -15,10 +15,11 @@ import java.util.UUID;
 
 //In this thread we make the connection. The reason why a separate thread is used for connection is because the connection of the bluetooth
 //can be a painful payload for the UI thread which can cause slowdowns.
+
 public class ConnectThread extends Thread {
-    private BluetoothSocket mmSocket; //variable for bluetooth socket
-    BluetoothDevice mmDevice; //The device is kept here. This variable takes its value from the constructor
-    OutputStream o; //This is the outputStream for sending data
+    private BluetoothSocket mmSocket;                                                        //variable for bluetooth socket
+    BluetoothDevice mmDevice;                                                                //The device is kept here. This variable takes its value from the constructor
+    OutputStream o;                                                                          //This is the outputStream for sending data
     private static final UUID uid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //This is the uuid used to create the rfcomm socket
 
 
