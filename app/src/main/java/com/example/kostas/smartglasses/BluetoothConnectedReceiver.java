@@ -14,7 +14,7 @@ public class BluetoothConnectedReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
 
-        //if the bluetooth is connected the main activity is being automatically started
+//        if the bluetooth is connected the main activity is being automatically started
         if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
             ConnectBlActivity.connectionState.setText("CONNECTED");
             NLService.setConneted(true);
