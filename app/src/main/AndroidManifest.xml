@@ -31,6 +31,7 @@
         </service>
         <activity android:name=".Main"></activity>
         <activity android:name=".State"></activity>
+        <service android:name=".Time"></service>
         <!--<receiver android:name=".BluetoothConnectedReceiver" android:enabled="true"></receiver>-->
     </application>
 

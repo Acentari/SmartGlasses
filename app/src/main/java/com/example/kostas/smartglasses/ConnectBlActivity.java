@@ -110,13 +110,13 @@ public class ConnectBlActivity extends AppCompatActivity {
 
 
         //This is the useless button
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), Main.class);
-                startActivity(i);
-            }
-        });
+//        b.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent i = new Intent(getApplicationContext(), Main.class);
+//                startActivity(i);
+//            }
+//        });
     }
 
 
