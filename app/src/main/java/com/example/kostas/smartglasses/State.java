@@ -1,15 +1,11 @@
 package com.example.kostas.smartglasses;
 
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-
 import static android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS;
 
 public class State extends AppCompatActivity {
@@ -25,7 +21,6 @@ public class State extends AppCompatActivity {
     }
 
 
-
     //This is the method which prompts the user to allow access for notification
     private AlertDialog buildNotificationServiceAlertDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -39,6 +34,8 @@ public class State extends AppCompatActivity {
                 });
         return (alertDialogBuilder.create());
     }
+
+
     @Override
     public void onRestart(){
         super.onRestart();

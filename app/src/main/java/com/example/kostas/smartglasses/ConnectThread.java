@@ -3,14 +3,15 @@ package com.example.kostas.smartglasses;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.widget.TextView;
+import android.os.Handler;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+
+import static android.os.Looper.getMainLooper;
 
 
 //In this thread we make the connection. The reason why a separate thread is used for connection is because the connection of the bluetooth
@@ -50,16 +51,30 @@ public class ConnectThread extends Thread {
     @Override
     public void run() {
         super.run();
-        try {
-            mmSocket.connect(); //This is where the magic of the connection happens
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        final Handler timeHandler = new Handler(getMainLooper());
+        timeHandler.postDelayed(new Runnable() {
+            int counter = 0;
+            @Override
+            public void run() {
+                if (!NLService.isConnected()) {
+                    counter ++;
+                    if (counter == 1) {
+                        try {
+                            mmSocket.connect(); //This is where the magic of the connection happens
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                timeHandler.postDelayed(this, 6000);
+            }
+        }, 6000);
     }
 
 
     //When this method is called some bydes of our choice are written on the outputStream
-    public void write(String s) throws IOException {
-        this.o.write(s.getBytes());
+    public void write(byte[] s) throws IOException {
+        this.o.write(s);
     }
 }

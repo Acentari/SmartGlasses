@@ -1,33 +1,39 @@
 package com.example.kostas.smartglasses;
 
-import android.bluetooth.BluetoothAdapter;
+
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
-
+import android.util.Log;    
 import java.io.IOException;
-import java.util.Set;
+import java.io.OutputStream;
+
 
 public class NLService extends NotificationListenerService {
-    public static BluetoothAdapter mmBluetoothAdapter;
-    private static boolean fb = false;  //set facebbok listening state to false. This variable remembers the state even after we kill the app
+    private OutputStream o;
+    private static boolean fb = false;   //set facebook listening state to false. This variable remembers the state even after we kill the app
     private static boolean insta;
     private static boolean connected = false;
-    public static IntentFilter filter;
-    private static ConnectThread cone;   //This is a variable used in creating an object of ConnectThread in which thread the bluetooth connection is made happen
+    IntentFilter filter;
+    BluetoothConnectedReceiver mmReceiver;
+    private static ConnectThread cone;
+    public static boolean timeRunning = false;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mmBluetoothAdapter = ConnectBlActivity.getMBluetoothAdapter();
         cone = ConnectBlActivity.con;
 
+        //These are actions for the state of the connection
+        filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        mmReceiver = new BluetoothConnectedReceiver();
+        this.registerReceiver(mmReceiver, filter);
     }
 
 
@@ -59,7 +65,7 @@ public class NLService extends NotificationListenerService {
     }
 
 
-    public static void setConneted(boolean c) {
+    public static void setConnected(boolean c) {
         connected = c;
     }
 
@@ -68,72 +74,85 @@ public class NLService extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
 
-
-        //Here every notification is checked and if the user wands to listen to facebook, we get the message
-        if (getFb()) {
-            if (sbn.getPackageName().equals("com.facebook.orca")) {   //checking if the is a notification from facebook
-                String pack = "Facebook";
-                Bundle extras = sbn.getNotification().extras;
-                String title = extras.getString("android.text");    //This is the actual user that sends the message
-                String text = extras.getCharSequence("android.title").toString();   //and that is the actual message
+        if(isConnected()) {
+            cone = ConnectBlActivity.con;
+            //Here every notification is checked and if the user wands to listen to facebook, we get the message
+            if (getFb()) {
 
 
-                Log.i("Title", title);
-                Log.i("Text", text);
+
+                if (sbn.getPackageName().equals("com.facebook.orca")) {   //checking if the is a notification from facebook
+                    Bundle extras = sbn.getNotification().extras;
+                    String title;
 
 
-                //The message is being put in a String Builder
-                StringBuilder msg = new StringBuilder();
-                msg.append(pack);
-                msg.append("\n");
-                msg.append(text);
-                msg.append("\n");
-                msg.append(title);
-
-                //The ui gets updated with the message
-                Main.t.setText(msg);
+                    if (!extras.getString("android.text").equals("Chat heads active")) {
+                        String pack = "Facebook";
+                        title = extras.getString("android.text");    //This is the actual user that sends the message
+                        String text = extras.getCharSequence("android.title").toString();   //and that is the actual message
 
 
-                //The message is written to the outputStream
-                try {
-                    cone.write(msg.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        Log.i("Title", title);
+                        Log.i("Text", text);
+
+
+                        //The message is being put in a String Builder
+                        StringBuilder msg = new StringBuilder();
+                        msg.append(pack);
+                        msg.append("\n");
+                        msg.append(text);
+                        msg.append("\n");
+                        msg.append(title);
+                        msg.append("\n");
+
+                        //The ui gets updated with the message
+                        Main.t.setText(msg);
+
+
+                        //The message is written to the outputStream
+
+                        try {
+                            byte[] send = msg.toString().getBytes();
+                            cone.write(send);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
-        }
 
 
-        //Here every notification is checked and if the user wands to listen to instagram, we get the message
-        if (getInsta()) {
-            if (sbn.getPackageName().equals("com.instagram.android")) {   //checking if the is a notification from facebook
-                String pack = "Instagram";
-                Bundle extras = sbn.getNotification().extras;
-                String title = extras.getString("android.text");    //This is the actual user that sends the message
-                String text = extras.getCharSequence("android.title").toString();   //and that is the actual message
+            //Here every notification is checked and if the user wands to listen to instagram, we get the message
+            if (getInsta()) {
+                if (sbn.getPackageName().equals("com.instagram.android")) {   //checking if the is a notification from facebook
+                    Bundle extras = sbn.getNotification().extras;
+                    String title = extras.getString("android.text");    //This is the actual user that sends the message
+                    String text = extras.getCharSequence("android.title").toString();   //and that is the actual message
 
 
-                Log.i("Title", title);
-                Log.i("Text", text);
+                    Log.i("Title", title);
+                    Log.i("Text", text);
 
 
-                //The message is being put in a String Builder
-                StringBuilder msg = new StringBuilder();
-                msg.append(pack);
-                msg.append("\n");
-                msg.append(text);
-                msg.append("\n");
-                msg.append(title);
+                    //The message is being put in a String Builder
+                    StringBuilder msg = new StringBuilder();
+                    msg.append("\n");
+                    msg.append(text);
+                    msg.append("\n");
+                    msg.append(title);
+                    msg.append("\n");
 
-                //The ui gets updated with the message
-                Main.t.setText(msg);
+                    //The ui gets updated with the message
+                    Main.t.setText(msg);
 
 
-                //The message is written to the outputStream
-                try {
-                    cone.write(msg.toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    //The message is written to the outputStream
+                    try {
+                        byte[] send = msg.toString().getBytes();
+                        cone.write(send);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
