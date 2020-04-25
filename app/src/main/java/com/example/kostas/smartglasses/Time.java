@@ -41,7 +41,7 @@ public class Time extends Service {
             public void run() {
 
                 SimpleDateFormat sdf = new SimpleDateFormat("\nHH:mm", Locale.getDefault());
-                String temp = sdf.format(new Date())+",\n";
+                String temp = sdf.format(new Date())+",\n       ";
 
 
                 if(!time.equals(temp)) {
