@@ -5,4 +5,7 @@
     <string name="notification_listener_service_explanation">"For the the app. to work you need to enable the Notification Listener Service. Enable it now?"</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name = "device_pair_explanation">Seems that you haven\'t paired SMART GLASSES. Please go to settings and pair it</string>
+    <string name="title_for_device_pair">Pair Device</string>
+    <string name="settings">Settings</string>
 </resources>

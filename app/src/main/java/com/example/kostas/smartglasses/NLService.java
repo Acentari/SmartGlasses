@@ -1,14 +1,15 @@
 package com.example.kostas.smartglasses;
 
 
-import android.bluetooth.BluetoothDevice;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;    
+import android.util.Log;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 
 public class NLService extends NotificationListenerService {
@@ -16,24 +17,17 @@ public class NLService extends NotificationListenerService {
     private static boolean fb = false;   //set facebook listening state to false. This variable remembers the state even after we kill the app
     private static boolean insta;
     private static boolean connected = false;
-    IntentFilter filter;
-    BluetoothConnectedReceiver mmReceiver;
     private static ConnectThread cone;
     public static boolean timeRunning = false;
+    public static boolean main = false;
+    public static boolean bl = false;
+    public static boolean reRunning = false;
+    public static boolean ok = false;
+
 
     @Override
     public void onCreate() {
         super.onCreate();
-        cone = ConnectBlActivity.con;
-
-        //These are actions for the state of the connection
-        filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
-        mmReceiver = new BluetoothConnectedReceiver();
-        this.registerReceiver(mmReceiver, filter);
     }
 
 
@@ -80,7 +74,6 @@ public class NLService extends NotificationListenerService {
             if (getFb()) {
 
 
-
                 if (sbn.getPackageName().equals("com.facebook.orca")) {   //checking if the is a notification from facebook
                     Bundle extras = sbn.getNotification().extras;
                     String title;
@@ -103,7 +96,6 @@ public class NLService extends NotificationListenerService {
                         msg.append(text);
                         msg.append("\n");
                         msg.append(title);
-                        msg.append("\n");
 
                         //The ui gets updated with the message
                         Main.t.setText(msg);
@@ -111,9 +103,9 @@ public class NLService extends NotificationListenerService {
 
                         //The message is written to the outputStream
 
+                        byte[] send = msg.toString().getBytes();
                         try {
-                            byte[] send = msg.toString().getBytes();
-                            cone.write(send);
+                            cone.write(String.valueOf(msg));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -129,6 +121,9 @@ public class NLService extends NotificationListenerService {
                     String title = extras.getString("android.text");    //This is the actual user that sends the message
                     String text = extras.getCharSequence("android.title").toString();   //and that is the actual message
 
+                    SimpleDateFormat sdff = new SimpleDateFormat("HH:mm", Locale.getDefault());
+                    String tempf = sdff.format(new Date());
+
 
                     Log.i("Title", title);
                     Log.i("Text", text);
@@ -136,11 +131,12 @@ public class NLService extends NotificationListenerService {
 
                     //The message is being put in a String Builder
                     StringBuilder msg = new StringBuilder();
-                    msg.append("\n");
+                    msg.append("`");
+                    msg.append(tempf);
+                    msg.append(" ");
                     msg.append(text);
-                    msg.append("\n");
+                    msg.append(" ");
                     msg.append(title);
-                    msg.append("\n");
 
                     //The ui gets updated with the message
                     Main.t.setText(msg);
@@ -148,8 +144,7 @@ public class NLService extends NotificationListenerService {
 
                     //The message is written to the outputStream
                     try {
-                        byte[] send = msg.toString().getBytes();
-                        cone.write(send);
+                        cone.write(String.valueOf(msg));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

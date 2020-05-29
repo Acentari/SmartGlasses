@@ -1,9 +1,8 @@
 package com.example.kostas.smartglasses;
 
+import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -14,70 +13,92 @@ import java.util.Date;
 import java.util.Locale;
 
 
+
 public class Time extends Service {
     private static ConnectThread cone;
+    public static BluetoothAdapter bt;
 
     @Override
     public void onCreate() {
-        cone = ConnectBlActivity.con;
+        super.onCreate();
+        NLService.timeRunning = true;
 
 
-        SimpleDateFormat sdff = new SimpleDateFormat("\nHH:mm", Locale.getDefault());
-        final String tempf = sdff.format(new Date())+",\n";
-        final Handler timeHandler = new Handler(getMainLooper());
+        cone = BluetoothConnectedReceiver.cone;
+        bt = ConnectBlActivity.getmBluetoothAdapter();
 
-        Main.t.setText(String.valueOf(tempf));
+        SimpleDateFormat sdff = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        final String tempf = "," + sdff.format(new Date());
+
+        Main.t.setText(tempf);
         try {
-            cone.write(tempf.getBytes());
+            cone.write(tempf);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        final Handler timeHandler = new Handler(getMainLooper());
         timeHandler.postDelayed(new Runnable() {
-            String time = tempf;
-            int times =0;
+            String tempff = tempf;
+            String temp;
+            String time = tempff;
 
             @Override
             public void run() {
 
-                SimpleDateFormat sdf = new SimpleDateFormat("\nHH:mm", Locale.getDefault());
-                String temp = sdf.format(new Date())+",\n       ";
+                temp = "," + sdf.format(new Date());
 
 
                 if(!time.equals(temp)) {
-                    times++;
                     this.time = temp;
                     Main.t.setText(String.valueOf(time));
+
+
                     try {
-                        byte[] send = time.getBytes();
-                        cone.write(send);
+                        cone.write(time);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
 
-                timeHandler.postDelayed(this, 100);
+
+                if (!bt.isEnabled() || !NLService.isConnected()) {
+                    if (NLService.isConnected()) {
+                        NLService.setConnected(false);
+                    }
+
+
+                    timeHandler.removeCallbacks(this);
+                    stopService(new Intent(getApplicationContext(),Re.class));
+                    stopSelf();
+                }
+
+
+                if (NLService.isConnected()) {
+                    timeHandler.postDelayed(this, 100);
+                }
             }
         }, 100);
     }
 
-
+    
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
 
-//    public class TestReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String action = intent.getAction();
-//
-//            if(action.equals("btd")){
-//                NLService.setConnected(false);
-//                context.startActivity(new Intent(context,ConnectBlActivity.class));
-//            }
-//        }
-//    }
+    @Override
+    public void onDestroy() {
+        NLService.timeRunning = false;
+        super.onDestroy();
+        try {
+            cone.mmSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        cone.interrupt();
+    }
 }

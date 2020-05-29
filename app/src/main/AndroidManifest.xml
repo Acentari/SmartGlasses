@@ -3,6 +3,9 @@
     package="com.example.kostas.smartglasses">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
 
@@ -29,9 +32,13 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <activity android:name=".Main"></activity>
-        <activity android:name=".State"></activity>
-        <service android:name=".Time"></service>
+
+        <activity
+            android:name=".Main"
+            android:noHistory="true" />
+        <activity android:name=".State" />
+        <service android:name=".Time" />
+        <service android:name=".Re" android:enabled="true"/>
         <!--<receiver android:name=".BluetoothConnectedReceiver" android:enabled="true"></receiver>-->
     </application>
 

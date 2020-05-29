@@ -1,6 +1,8 @@
 package com.example.kostas.smartglasses;
 
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,25 +15,21 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.IOException;
 import java.util.Set;
 
 
 public class ConnectBlActivity extends AppCompatActivity {
     //crating some variables
-    private static BluetoothAdapter mBluetoothAdapter;  //This is the Bluetooth Adapter which is used for enabling the bluetooth
-    static TextView connectionState;                    //This variable the state of the connection
-    Button b;                                           //This button is useless. It is there only for debuging reasons and it will not be there on the final app
-    public static ConnectThread con;                    //This is a variable used in creating an object of ConnectThread in which thread the bluetooth connection is made happen
-    public static boolean onC =false;
-    public static OutputStream o;
-    public static BluetoothDevice mDevice;
+    public static BluetoothAdapter mBluetoothAdapter;  //This is the Bluetooth Adapter which is used for enabling the bluetooth
+    static TextView connectionState;                   //This variable the state of the connection
+    Button b;                                          //This button is useless. It is there only for debuging reasons and it will not be there on the final app
+    public static ConnectThread con = null;            //This is a variable used in creating an object of ConnectThread in which thread the bluetooth connection is made happen
+    public BluetoothDevice mDevice;
 
 
     @Override
@@ -39,8 +37,12 @@ public class ConnectBlActivity extends AppCompatActivity {
         super.onCreate(savedInstance);
         setContentView(R.layout.connection_screen);
         connectionState = findViewById(R.id.connect);
-        b = findViewById(R.id.button);                  //the usless button takes the reference from the xml file
+        NLService.bl = true;
 
+
+        if (!isMyServiceRunning(Re.class)) {
+            startService(new Intent(getApplicationContext(),Re.class));
+        }
 
         //Checking if the permission for notification listening are given
         if (!Settings.Secure.getString(this.getContentResolver(),"enabled_notification_listeners").contains(getApplicationContext().getPackageName())){
@@ -53,7 +55,6 @@ public class ConnectBlActivity extends AppCompatActivity {
             if(!NLService.isConnected()){
                 mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
                 if (!mBluetoothAdapter.isEnabled()) {
                     Intent enBt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enBt, 1);
@@ -61,29 +62,31 @@ public class ConnectBlActivity extends AppCompatActivity {
 
                     final Handler timeHandler = new Handler(getMainLooper());
                     timeHandler.postDelayed(new Runnable() {
-                        int counter = 0;
+                        boolean b = false;
+                        @SuppressLint("ShowToast")
                         @Override
                         public void run() {
                             if (mBluetoothAdapter.isEnabled()) {
-                                counter ++;
-
-                                if (NLService.isConnected() && counter == 1) {
-                                    Intent intent = new Intent(getApplicationContext(),Main.class);
-//                                    intent.putExtra("ConnectThread", (Serializable) con);
-                                    startActivity(intent);
-                                }
-
-                                else if(!NLService.isConnected() && counter == 1) {
+                                if(!NLService.isConnected()) {
                                     connectDevice();
+                                    b = true;
                                 }
                             }
-                            timeHandler.postDelayed(this, 100);
+
+                            if (b) {
+                                timeHandler.removeCallbacks(this);
+                            }
+
+                            if (!b) {
+                                timeHandler.postDelayed(this, 1000);
+                            }
                         }
-                    }, 100);
+                    }, 1000);
                 }
 
 
-                else if (mBluetoothAdapter.isEnabled()){
+                else {
+                    mBluetoothAdapter.isEnabled();
                     //If the bluetooth is enabled we get all the paired bluetooth devices of the phone and search for the name
                     // of the device we want to connect to
                     connectDevice();
@@ -92,8 +95,6 @@ public class ConnectBlActivity extends AppCompatActivity {
 
 
             else if (NLService.isConnected()) {
-
-
                 if (!mBluetoothAdapter.isEnabled()) {
                     NLService.setConnected(false);
                     startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 1);
@@ -102,21 +103,10 @@ public class ConnectBlActivity extends AppCompatActivity {
 
                 else if(NLService.isConnected() && mBluetoothAdapter.isEnabled()) {
                     Intent intent = new Intent(getApplicationContext(),Main.class);
-//                    intent.putExtra("ConnectThread", con);
                     startActivity(intent);
                 }
             }
         }
-
-
-        //This is the useless button
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), Main.class);
-                startActivity(i);
-            }
-        });
     }
 
 
@@ -139,68 +129,97 @@ public class ConnectBlActivity extends AppCompatActivity {
     }
 
 
-    private void connectDevice() {
+    public void connectDevice() {
+
+        NLService.bl = true;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         final Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
 
         if(pairedDevices.size() > 0){
             for(BluetoothDevice device : pairedDevices){
-                if (device.getName().equals("SMART GLASSES")){
+                if (device.getName().equals("Turbo-x Chicago")){
                     mDevice = device;
                 }
             }
 
 
             if(mDevice != null){
-                con = new ConnectThread(mDevice);   //The object of the ConnectThread is created here. The constructor takes the wanted device as a parameter if found
-                con.start();
-                //The thread starts
-
-
-                final Handler timeHandler = new Handler(getMainLooper());
-                timeHandler.postDelayed(new Runnable() {
-                    int counter = 0;
-                    @Override
-                    public void run() {
-                        if (NLService.isConnected()) {
-                            counter ++;
-                            if (counter == 1) {
-                                Intent intent = new Intent(getApplicationContext(),Main.class);
-//                                intent.putExtra("ConnectThread", con);
-                                startActivity(intent);
-                                Toast.makeText(getApplicationContext(),"hi",Toast.LENGTH_LONG);
-                            }
-                        }
-                        timeHandler.postDelayed(this, 100);
-                    }
-                }, 100);
+                NLService.ok = true;
+                if (!NLService.isConnected()) {
+                    con = new ConnectThread(mDevice);
+                    con.start();
+                }
             }
 
 
             else if (mDevice == null) {
-                pairDevice().show();
+                Handler h1 = new Handler(getMainLooper());
+                h1.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Set<BluetoothDevice> paired1Devices = mBluetoothAdapter.getBondedDevices();
+                        if(paired1Devices.size() > 0) {
+                            for (BluetoothDevice device : paired1Devices) {
+                                if (device.getName().equals("Turbo-x Chicago")) {
+                                    mDevice = device;
+                                    con = new ConnectThread(mDevice);
+                                    con.start();
+                                    h1.removeCallbacks(this);
+                                }
+
+
+                                else{
+                                    h1.postDelayed(this,600);
+                                }
+                            }
+                        }
+                    }
+                },600);
             }
         }
     }
 
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onRestart() {
         super.onRestart();
+        NLService.bl = true;
 
         if (NLService.isConnected()) {
-            connectionState.setText("CONNECTED");
-            Intent intent = new Intent(getApplicationContext(),Main.class);
-//            intent.putExtra("MyClass", con);
-            startActivity(intent);
+            startActivity(new Intent(getApplicationContext(),Main.class));
         }
 
-        else if (!NLService.isConnected()) {
-            connectionState.setText("DISCONNECTED");
+
+        else {
+            if (NLService.ok && !NLService.timeRunning) {
+                Toast.makeText(getApplicationContext(),"Disconnected. Killing the app",Toast.LENGTH_LONG);
+                NLService.setConnected(false);
+                NLService.bl = false;
+                finish();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        NLService.bl = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!NLService.isConnected()) {
             stopService(new Intent(getApplicationContext(),Time.class));
-            NLService.setConnected(false);
-            connectDevice();
+            stopService(new Intent(getApplicationContext(),Re.class));
+            try {
+                con.mmSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            con.interrupt();
         }
     }
 

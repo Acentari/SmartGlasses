@@ -1,28 +1,17 @@
 package com.example.kostas.smartglasses;
 
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.UUID;
-
-import static com.example.kostas.smartglasses.ConnectBlActivity.con;
-import static com.example.kostas.smartglasses.ConnectBlActivity.mDevice;
-import static java.util.Objects.requireNonNull;
 
 public class Main extends AppCompatActivity {
 
@@ -31,8 +20,10 @@ public class Main extends AppCompatActivity {
     TextView m;
     private Switch facebook;
     private Switch instagram;
+    private static ConnectThread cone;
+    BluetoothAdapter bt;
 
-
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,22 +35,13 @@ public class Main extends AppCompatActivity {
         instagram = findViewById(R.id.switch6);
         m = findViewById(R.id.message);
         t = findViewById(R.id.title);
+        NLService.main = true;
+        cone = ConnectBlActivity.con;
 
 
-
-        final BluetoothAdapter bt = ConnectBlActivity.getmBluetoothAdapter();
-//        cone = ConnectBlActivity.con;
-
-        if (NLService.timeRunning) {
-            stopService(new Intent(getApplicationContext(),Time.class));
-        }
-
-        if (!NLService.timeRunning) {
+        if (!isMyServiceRunning(Time.class)) {
             startService(new Intent(getApplicationContext(),Time.class));
-            NLService.timeRunning = true;
         }
-
-
 
         if (NLService.getFb()) {
             facebook.setChecked(true);
@@ -72,30 +54,27 @@ public class Main extends AppCompatActivity {
 
 
         //If the user wands to listen to facebook turns on the switch
-        facebook.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        facebook.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //if the switch is on the facebook listening state goes to true
                 if (isChecked) {
-                    NLService.setFb(true);//if the switch is on the facebook listening state goes to true
+                    NLService.setFb(true);
                 }
                 //If not, it goes to false
                 if (!isChecked) {
                     NLService.setFb(false);
                 }
-            }
         });
 
 
         //If the user wands to listen to Instagram turns on the switch
-        instagram.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    NLService.setInsta(true);
-                }
-                if (!isChecked) {
-                    NLService.setInsta(false);
-                }
+        instagram.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            //if the switch is on the instagram listening state goes to true
+            if (isChecked) {
+                NLService.setInsta(true);
+            }
+            //If not, it goes to false
+            if (!isChecked) {
+                NLService.setInsta(false);
             }
         });
 
@@ -104,17 +83,29 @@ public class Main extends AppCompatActivity {
         timeHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!bt.isEnabled() || !NLService.isConnected()) {
+                if (!NLService.isConnected()) {
                     NLService.setConnected(false);
-                    stopService(new Intent(getApplicationContext(),Time.class));
+                    cone.interrupt();
                     finish();
                 }
-
                 timeHandler.postDelayed(this, 100);
             }
-        }, 100);
+        },100);
     }
 
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        NLService.main = false;
+    }
+
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        NLService.main = true;
+    }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -124,10 +115,5 @@ public class Main extends AppCompatActivity {
             }
         }
         return false;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
     }
 }
