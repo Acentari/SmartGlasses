@@ -37,7 +37,7 @@ public class Time extends Service {
             e.printStackTrace();
         }
 
-        
+
         final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         final Handler timeHandler = new Handler(getMainLooper());
         timeHandler.postDelayed(new Runnable() {
